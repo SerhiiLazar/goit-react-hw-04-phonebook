@@ -1,71 +1,45 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import Contacts from './Contacts';
 import { nanoid } from 'nanoid';
 import Section from './Section';
 import Form from './Form';
 import css from './App.module.css';
 
-class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
+function App() {
+  const [contacts, setContacts] = useState(() => {
+    return JSON.parse(window.localStorage.getItem('contacts')) ?? [];
+  });
 
-  componentDidMount() {
-    const contacts = localStorage.getItem('contacts');
-    const contactsParse = JSON.parse(contacts);
-
-    if (contactsParse) {
-      this.setState({ contacts: contactsParse });
+  useEffect(() => {
+    if (contacts) {
+      localStorage.setItem('contacts', JSON.stringify(contacts));
     }
-  }
+  }, [contacts]);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
-
-  formSubmitHandler = data => {
-    const onContact = this.state.contacts.some(id => id.name === data.name);
-    if (onContact) {
-      alert(`Contact "${data.name}" is already exist.`);
-      return;
+  const formSubmitHandler = ({ name, number }) => {
+    console.log('name', name, number);
+    const livContacts = contacts.map(contact => contact.name);
+    if (!livContacts) {
+      return alert(`Contact "${name}" is already exist.`);
     }
 
-    this.setState(prevState => ({
-      contacts: [...prevState.contacts, { ...data, id: nanoid() }],
-    }));
+    setContacts(state => [...state, { id: nanoid(), name, number }]);
+    console.log(setContacts);
   };
 
-  onDelete = deleteID => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(({ id }) => id !== deleteID),
-    }));
+  const onDelete = deleteId => {
+    setContacts(contact => contact.filter(({ id }) => id !== deleteId));
   };
-
-  handleInputChange = e => {
-    this.setState({ filter: e.target.value });
-  };
-
-  render() {
-    const { filter, contacts } = this.state;
-    return (
-      <div className={css.appBody}>
-        <Section title="Phonebook">
-          <Form onSubmit={this.formSubmitHandler} />
-        </Section>
-        <Section title="Contacts">
-          <Contacts
-            contacts={contacts}
-            filter={filter}
-            imputChange={this.handleInputChange}
-            onClickDelete={this.onDelete}
-          />
-        </Section>
-      </div>
-    );
-  }
+  return (
+    <div className={css.appBody}>
+      <Section title="Phonebook">
+        <Form onSubmit={formSubmitHandler} />
+      </Section>
+      <Section title="Contacts">
+        <Contacts contacts={contacts} onClickDelete={onDelete} />
+      </Section>
+    </div>
+  );
 }
 
 export default App;
