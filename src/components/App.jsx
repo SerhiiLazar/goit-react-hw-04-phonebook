@@ -19,12 +19,11 @@ function App() {
   const formSubmitHandler = ({ name, number }) => {
     console.log('name', name, number);
     const livContacts = contacts.map(contact => contact.name);
-    if (!livContacts) {
-      return alert(`Contact "${name}" is already exist.`);
+    if (livContacts.includes(name)) {
+      alert(`Contact "${name}" is already exist.`);
+      return;
     }
-
     setContacts(state => [...state, { id: nanoid(), name, number }]);
-    console.log(setContacts);
   };
 
   const onDelete = deleteId => {

@@ -26,7 +26,6 @@ function Form({ onSubmit }) {
 
     setName('');
     setNamber('');
-    console.log(setName);
   };
 
   return (
